@@ -29,15 +29,23 @@
     };
   };
 
-  var request = function(location, offset) {
-    var API = "http://localhost/panorama.json";
+  var convertValue = function(val) {
+    var ex = val.split("(");
+
+    if(ex.length > 1){
+      val = ex[1].replace(")", "") + ",, " + ex[0];
+    }
+
+    return val;
+  };
+
+  var request = function(location, what, offset) {
+    var API = "http://localhost/panorama-ajax-search";
 
     $.ajax({
       type: "post",
       url: API,
       data: {
-        allegro: null,
-        category: null,
         close: false,
         count: 25,
         offset: offset,
@@ -45,21 +53,18 @@
         disableNameAndOfferCount: true,
         forceAlgorithm: true,
         groupBy: "VOIV|CITY|DISTRICT|CITY_RESTRICTED_VOIV|KITCHEN|EXTRA_INFORMATIONS",
-        kitchen: null,
         location: location,
-        openNow: null,
-        pictureReq: null,
         searchType: "ALGORITHM",
         snippet: "yellow",
-        sort: null,
         typ: undefined,
-        what: ""
+        what: what
       },
       success: function(data){
 
         var result = $.parseJSON(data);
 
         if (result.e == 1) {
+          $('#send').button('reset');
           return false;
         }
 
@@ -67,7 +72,7 @@
         var lastItem;
 
         $content.each(function() {
-          var name = $(this).find('.nameArea a').text();
+          var name = $(this).find('.js-offerName').text();
           var address = $(this).find('.addressArea').text();
           var phone = $(this).find('.phoneArea a').text();
           var www = $(this).find('.wwwArea a').text();
@@ -75,7 +80,8 @@
           var item = new Item(name, address, phone, www);
 
           if (item.compare(lastItem)) {
-            $('#result').append('Nazwa: ' + name + ', ' + address + ', ' + phone + ', ' + www + '<br>');
+            $('#results tbody').append('<tr><td>' + counter + '</td><td>' + name + '</td><td>' + address + '</td><td class="nowrap">' + phone + '</td><td>' + www + '</td></tr>');
+            counter++;
           }
 
           lastItem = item;
@@ -84,9 +90,58 @@
     });
   };
 
-  var totalOffset = 1000;
+  var counter;
 
-  for (var i = 25; i < totalOffset; i = i + 25) {
-    request("mazowieckie,,Warszawa", i);
-  };
+  $('#send').click(function(event) {
+    event.preventDefault();
+    var what = $('#what').val();
+    var location = $('#location').val();
+    var totalOffset = $('#number-show').text();
+
+    $('#send').button('loading');
+
+    $('#results tbody').empty();
+    counter = 1;
+
+    for (var i = 25; i <= totalOffset; i = i + 25) {
+      request(convertValue(location), what, i);
+    };
+
+  });
+
+  $('#what').typeahead({
+    source: function (query, process) {
+      return $.get('http://localhost/panorama-search', { p: query }, function (data) {
+        return process(data.split("\n"));
+      });
+    }
+  });
+
+  $('#location').typeahead({
+    source: function (query, process) {
+      return $.get('http://localhost/panorama-search', { l: query }, function (data) {
+        return process(data.split("\n"));
+      });
+    }
+  });
+
+  $('#number-of-searchs a').click(function() {
+    var $parent = $(this).closest('#number-of-searchs');
+    var $showNumber = $parent.find('#number-show');
+
+    $('#number-of-searchs li').removeClass('active');
+    $(this).parent().addClass('active');
+
+    $showNumber.text($(this).text());
+  });
+
+  $('#save').click(function(event) {
+    event.preventDefault();
+
+    //$.post('excel.php', { table: $('#results tbody').html() });
+
+    $('#table-data').val($('#results tbody').html());
+    $('form').submit();
+  });
+
 })(jQuery);

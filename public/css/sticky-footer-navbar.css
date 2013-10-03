@@ -44,3 +44,25 @@ body {
 code {
   font-size: 80%;
 }
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.nav .form-control {
+  margin-bottom: 0px;
+}
+
+.nav .form-group {
+  margin-bottom: 0px;
+  margin-top: 5px;
+}
+
+.navbar .btn, .navbar .btn-group {
+  margin-top: 0px;
+}
+
+.navbar {
+  position: fixed;
+  width: 100%;
+}
