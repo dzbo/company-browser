@@ -83,6 +83,7 @@
               <th>Adres</th>
               <th>Telefon</th>
               <th>www</th>
+              <th>Lokalizacja</th>
             </tr>
           </thead>
           <tbody>

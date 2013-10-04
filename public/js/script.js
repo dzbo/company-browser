@@ -26,6 +26,7 @@
       } else {
         return true;
       }
+      return true;
     };
   };
 
@@ -64,7 +65,6 @@
         var result = $.parseJSON(data);
 
         if (result.e == 1) {
-          $('#send').button('reset');
           return false;
         }
 
@@ -74,13 +74,18 @@
         $content.each(function() {
           var name = $(this).find('.js-offerName').text();
           var address = $(this).find('.addressArea').text();
+          var comment = $(this).find('.crossCommentArea').text();
           var phone = $(this).find('.phoneArea a').text();
           var www = $(this).find('.wwwArea a').text();
+          var link = $(this).find('.linkArea a').attr('href');
+          var id = $(this).attr('id');
 
           var item = new Item(name, address, phone, www);
 
+          comment = comment == '' ? '' : '(' + comment + ')';
+
           if (item.compare(lastItem)) {
-            $('#results tbody').append('<tr><td>' + counter + '</td><td>' + name + '</td><td>' + address + '</td><td class="nowrap">' + phone + '</td><td>' + www + '</td></tr>');
+            $('#results tbody').append('<tr><td>' + counter + '</td><td>' + name + '</td><td>' + address + ' ' + comment + '</td><td class="nowrap">' + phone + '</td><td>' + www + '</td><td><a href="' + link + '">Mapa</a></td></tr>');
             counter++;
           }
 
@@ -97,8 +102,6 @@
     var what = $('#what').val();
     var location = $('#location').val();
     var totalOffset = $('#number-show').text();
-
-    $('#send').button('loading');
 
     $('#results tbody').empty();
     counter = 1;
